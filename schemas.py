@@ -9,12 +9,14 @@ class TodoBase(BaseModel):
 class TodoCreate(BaseModel):
     title: str
     description: str
+    category: str
 
 
 class TodoUpdate(TodoBase):
     title: Optional[str]
     finish: Optional[bool]
     description: Optional[str]
+    category: Optional[str]
 
 
 class TodoDelete(TodoBase):

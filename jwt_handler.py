@@ -9,7 +9,8 @@ JWT_ALGORITHM = config("algorithm")
 def token_response(token: str):
     return {
         "auth_token": token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "status_code": 200
     }
 
 

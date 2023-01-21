@@ -73,7 +73,7 @@ def get_todo(todo_id: str, db: Session = Depends(get_data), user: UserBase = Dep
 def add_todo(todo: TodoCreate, db: Session = Depends(get_data), user: UserBase = Depends(get_current_user)):
 
     todo_model = Todo(id=str(uuid4()), title=todo.title,
-                      description=todo.description, owner_id=user.id)
+                      description=todo.description, owner_id=user.id, category=todo.category)
     db.add(todo_model)
     db.commit()
 
@@ -90,6 +90,8 @@ def update_todo(todo_id: str, todo: TodoUpdate, db: Session = Depends(get_data),
         todo_model.description = todo.description
     if todo.title is not None:
         todo_model.title = todo.title
+    if todo.category is not None:
+        todo_model.category = todo.category
     todo_model.owner_id = user.id
 
     db.commit()

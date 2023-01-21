@@ -10,7 +10,7 @@ class Todo(Base):
     title = Column(String)
     description = Column(String)
     finish = Column(Boolean, default=False)
-
+    category = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="items")

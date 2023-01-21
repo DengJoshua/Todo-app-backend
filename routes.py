@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from uuid import uuid4
 from fastapi.responses import JSONResponse
+from pydantic import EmailStr
 
 from models import User
 from schemas import UserLogin, UserCreate
@@ -44,5 +45,4 @@ def login(user: UserLogin, db: Session = Depends(get_data)):
 
     if not user_model:
         return HTTPException(status_code=400, detail="Incorrect email or password")
-
     return verify_password(user.password, user_model.hashed_password, user_model.id)
