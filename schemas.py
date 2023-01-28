@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Required
 from typing import Union, Optional
+from fastapi import Query
 
 
 class TodoBase(BaseModel):
@@ -10,6 +11,8 @@ class TodoCreate(BaseModel):
     title: str
     description: str
     category: str
+    start_date: str
+    end_date: str
 
 
 class TodoUpdate(TodoBase):
@@ -17,6 +20,8 @@ class TodoUpdate(TodoBase):
     finish: Optional[bool]
     description: Optional[str]
     category: Optional[str]
+    start_date: Optional[str]
+    end_date: Optional[str]
 
 
 class TodoDelete(TodoBase):

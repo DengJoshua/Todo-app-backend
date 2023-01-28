@@ -12,7 +12,8 @@ class Todo(Base):
     finish = Column(Boolean, default=False)
     category = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
-
+    start_date = Column(String)
+    end_date = Column(String)
     owner = relationship("User", back_populates="items")
 
 

@@ -4,12 +4,14 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from database import SessionLocal, Base, engine, get_data
 from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
+from datetime import date
 
 
 from jwt_handler import jwt_decode
 
 from schemas import TodoCreate, TodoUpdate, UserBase
 from routes import router, oauth2_scheme
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -56,7 +58,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 
 @app.get("/")
 def home():
-    return {"Home Page"}
+    today = date.today()
+    return today
 
 
 @app.get("/api/todos")
@@ -69,14 +72,12 @@ def get_todo(todo_id: str, db: Session = Depends(get_data), user: UserBase = Dep
     return db.query(Todo).filter(Todo.id == todo_id).first()
 
 
-@app.post("/api/todos")
+@app.post("/api/todos", status_code=status.HTTP_201_CREATED)
 def add_todo(todo: TodoCreate, db: Session = Depends(get_data), user: UserBase = Depends(get_current_user)):
-
     todo_model = Todo(id=str(uuid4()), title=todo.title,
-                      description=todo.description, owner_id=user.id, category=todo.category)
+                      description=todo.description, owner_id=user.id, category=todo.category, end_date=todo.end_date, start_date=todo.start_date)
     db.add(todo_model)
     db.commit()
-
     return db.query(Todo).filter(Todo.owner_id == user.id).all()
 
 
