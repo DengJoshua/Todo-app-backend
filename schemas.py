@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Required
-from typing import Union, Optional
+from typing import Union, Optional, List
 from fastapi import Query
 
 
@@ -10,16 +10,16 @@ class TodoBase(BaseModel):
 class TodoCreate(BaseModel):
     title: str
     description: str
-    category: str
     start_date: str
     end_date: str
+    tags: str
 
 
 class TodoUpdate(TodoBase):
     title: Optional[str]
     finish: Optional[bool]
     description: Optional[str]
-    category: Optional[str]
+    tags: Optional[str]
     start_date: Optional[str]
     end_date: Optional[str]
 
@@ -33,11 +33,16 @@ class UserBase(BaseModel):
     email: str
     username: str
     hashed_password: str
+    tags: str
 
 
 class UserLogin(BaseModel):
     email: str
     password: str
+
+
+class UserUpdate(BaseModel):
+    tags: str
 
 
 class UserCreate(BaseModel):

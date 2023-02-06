@@ -6,12 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
 from datetime import date
 
-
 from jwt_handler import jwt_decode
 
 from schemas import TodoCreate, TodoUpdate, UserBase
 from routes import router, oauth2_scheme
-
 
 Base.metadata.create_all(bind=engine)
 
@@ -74,10 +72,15 @@ def get_todo(todo_id: str, db: Session = Depends(get_data), user: UserBase = Dep
 
 @app.post("/api/todos", status_code=status.HTTP_201_CREATED)
 def add_todo(todo: TodoCreate, db: Session = Depends(get_data), user: UserBase = Depends(get_current_user)):
-    todo_model = Todo(id=str(uuid4()), title=todo.title,
-                      description=todo.description, owner_id=user.id, category=todo.category, end_date=todo.end_date, start_date=todo.start_date)
+    todo_model = Todo(id=str(uuid4()), title=todo.title, description=todo.description,
+                      owner_id=user.id, tags=todo.tags, end_date=todo.end_date, start_date=todo.start_date)
     db.add(todo_model)
+    user_model = user
+
+    user_model.tags += " " + todo.tags
+    db.add(user_model)
     db.commit()
+
     return db.query(Todo).filter(Todo.owner_id == user.id).all()
 
 
@@ -91,9 +94,18 @@ def update_todo(todo_id: str, todo: TodoUpdate, db: Session = Depends(get_data),
         todo_model.description = todo.description
     if todo.title is not None:
         todo_model.title = todo.title
-    if todo.category is not None:
-        todo_model.category = todo.category
+    if todo.tags is not None:
+        todo_model.tags = todo.tags
     todo_model.owner_id = user.id
+
+    db.commit()
+    return db.query(Todo).filter(Todo.owner_id == user.id).all()
+
+
+@app.put("/api/todos/{todo_id}/finish")
+def update_todo_finish(todo_id: str, todo: TodoUpdate, db: Session = Depends(get_data), user: UserBase = Depends(get_current_user)):
+    todo_model = db.query(Todo).filter(Todo.id == todo_id).first()
+    todo_model.finish = todo.finish
 
     db.commit()
     return db.query(Todo).filter(Todo.owner_id == user.id).all()

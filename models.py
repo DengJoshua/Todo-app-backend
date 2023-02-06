@@ -10,11 +10,11 @@ class Todo(Base):
     title = Column(String)
     description = Column(String)
     finish = Column(Boolean, default=False)
-    category = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
     start_date = Column(String)
     end_date = Column(String)
     owner = relationship("User", back_populates="items")
+    tags = Column(String)
 
 
 class User(Base):
@@ -24,5 +24,6 @@ class User(Base):
     username = Column(String)
     email = Column(String)
     hashed_password = Column(String)
+    tags = Column(String, default="")
 
     items = relationship("Todo", back_populates="owner")

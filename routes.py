@@ -5,9 +5,10 @@ from passlib.context import CryptContext
 from uuid import uuid4
 from fastapi.responses import JSONResponse
 from pydantic import EmailStr
+from jwt_handler import jwt_decode
 
 from models import User
-from schemas import UserLogin, UserCreate
+from schemas import UserLogin, UserCreate, UserBase, UserUpdate
 from database import get_data
 from jwt_handler import sign_jwt
 
@@ -16,6 +17,28 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth_token")
 
 router = APIRouter()
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_data)):
+    auth_token = jwt_decode(token)
+
+    if not auth_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = db.query(User).filter(User.id == auth_token["user_id"]).first()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user
 
 
 def verify_password(plain_password, hashed_password, user_id):
@@ -37,6 +60,20 @@ def create_user(user: UserCreate,  db: Session = Depends(get_data)):
         return sign_jwt(user_id)
 
     return HTTPException(status_code=500, detail="Email already in use.")
+
+
+@router.post("/tags", status_code=status.HTTP_201_CREATED)
+def create_tag(tags: UserUpdate, db: Session = Depends(get_data), user: UserBase = Depends(get_current_user)):
+    user_model = user
+    user_model.tags += " " + tags.tags
+    db.add(user_model)
+    db.commit()
+    return user.tags.split()
+
+
+@router.get("/tags", status_code=status.HTTP_200_OK)
+def get_tags(db: Session = Depends(get_data), user: UserBase = Depends(get_current_user)):
+    return user.tags.split(" ")
 
 
 @router.post("/auth_token")
